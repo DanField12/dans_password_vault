@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'dart:typed_data';
+import 'package:aes_crypt/aes_crypt.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:developer' as developer;
+import 'dart:async';
+import 'dart:io';
 
 void main() {
   runApp(MyApp());
@@ -49,22 +55,90 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+class PasswordRegistryElement {
+  final String title;
+
+  factory PasswordRegistryElement.fromJson(Map<String, dynamic> json) {
+    return PasswordRegistryElement(
+      title: json['title'] as String,
+    );
+  }
+}
+
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-
   void _incrementCounter() {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
       _counter++;
     });
   }
 
+  String readText;
+  void getPath() async {
+    await _read().then((String result) {
+      if (readText == null || result == null) {
+        setState(() {
+          readText = result;
+        });
+      }
+    });
+  }
+
+  var crypt = AesCrypt('my cool password');
+
+  _write(String text) async {
+    final Directory directory = await getApplicationDocumentsDirectory();
+    crypt.setOverwriteMode(AesCryptOwMode.on);
+    crypt.encryptTextToFileSync(text, '${directory.path}/testfile.txt.aes',
+        utf16: true);
+  }
+
+  Future<String> _read() async {
+    String text;
+    try {
+      final Directory directory = await getApplicationDocumentsDirectory();
+      text = crypt.decryptTextFromFileSync('${directory.path}/testfile.txt.aes',
+          utf16: true);
+    } catch (e) {
+      print("Couldn't read file");
+    }
+    return text;
+  }
+  // Future<File> get _localFile async {
+  //   final path = await _localPath;
+
+  //   return new File('$path/testfile.txt.aes');
+  // }
+
+  // void init() async {
+  //   final file = await _localFile;
+  //   // Write the file.
+  //   file.writeAsString('');
+  // }
+
+  // // // String _debug1;
+  // // // String _debug2;
+
+  // String test() {
+  //   init();
+  //   var crypt = AesCrypt('my cool password');
+  //   String encFilepath = '';
+  //   String srcText = 'some text';
+  //   String decText = '';
+  //   // encFilepath = crypt.encryptTextToFileSync(srcText, _localFile, utf16: true);
+  //   decText = crypt.decryptTextFromFileSync(encFilepath, utf16: true);
+  //   return encFilepath;
+  // }
+
   @override
   Widget build(BuildContext context) {
+    try {
+      getPath();
+      _write('hello');
+      print(readText);
+    } catch (e) {
+      print(e);
+    }
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -97,6 +171,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            // Text(test()),
             Text(
               'You have pushed the button this many times:',
             ),
