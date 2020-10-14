@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'package:aes_crypt/aes_crypt.dart';
@@ -5,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:developer' as developer;
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 void main() {
   runApp(MyApp());
@@ -55,15 +58,19 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class PasswordRegistryElement {
-  final String title;
+// class PasswordRegistryElement {
+//   final String title;
+//   final String content;
 
-  factory PasswordRegistryElement.fromJson(Map<String, dynamic> json) {
-    return PasswordRegistryElement(
-      title: json['title'] as String,
-    );
-  }
-}
+//   PasswordRegistryElement(this.title, this.content});
+
+//   factory PasswordRegistryElement.fromJson(Map<String, dynamic> json) {
+//     return PasswordRegistryElement(
+//       title: json['title'] as String,
+//       content: json['content'] as String,
+//     );
+//   }
+// }
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
@@ -76,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String readText;
   void getPath() async {
     await _read().then((String result) {
-      if (readText == null || result == null) {
+      if (readText == null && result != 'bruh') {
         setState(() {
           readText = result;
         });
@@ -84,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  var crypt = AesCrypt('my cool password');
+  var crypt = AesCrypt('my cool passwor');
 
   _write(String text) async {
     final Directory directory = await getApplicationDocumentsDirectory();
@@ -99,10 +106,11 @@ class _MyHomePageState extends State<MyHomePage> {
       final Directory directory = await getApplicationDocumentsDirectory();
       text = crypt.decryptTextFromFileSync('${directory.path}/testfile.txt.aes',
           utf16: true);
+      return text;
     } catch (e) {
       print("Couldn't read file");
+      return 'bruh';
     }
-    return text;
   }
   // Future<File> get _localFile async {
   //   final path = await _localPath;
@@ -133,9 +141,14 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     try {
+      // _write(
+      //     '{"elements" : [{"title": "John Smith", "content": "john@example.com"},{"title": "mike", "content": "password"}]}');
       getPath();
-      _write('hello');
-      print(readText);
+      Map<String, dynamic> row = jsonDecode(readText);
+      for (int i = 0; i < row['elements'].length; i++) {
+        print('${row['elements'][i]['title']}');
+        print('${row['elements'][i]['content']}');
+      }
     } catch (e) {
       print(e);
     }
