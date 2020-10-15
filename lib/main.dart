@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 import 'package:aes_crypt/aes_crypt.dart';
@@ -74,11 +73,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+  void _incrementCounter() {}
 
   String readText;
   void getPath() async {
@@ -140,24 +135,30 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    try {
-      // _write(
-      //     '{"elements" : [{"title": "John Smith", "content": "john@example.com"},{"title": "mike", "content": "password"}]}');
-      getPath();
-      Map<String, dynamic> row = jsonDecode(readText);
-      for (int i = 0; i < row['elements'].length; i++) {
-        print('${row['elements'][i]['title']}');
-        print('${row['elements'][i]['content']}');
+    List<Widget> getPasswords() {
+      List<Widget> buildList = [];
+      try {
+        // _write(
+        //     '{"elements" : [{"title": "John Smith", "content": "john@example.com"},{"title": "mike", "content": "password"}, {"title": "hugh", "content": "password2"}]}');
+        getPath();
+        Map<String, dynamic> row = jsonDecode(readText);
+        for (int i = 0; i < row['elements'].length; i++) {
+          buildList.add(
+            Container(
+              height: 50,
+              color: Colors.amber[600],
+              child: Center(
+                  child: Text(
+                      '${row['elements'][i]['title']} : ${row['elements'][i]['content']}')),
+            ),
+          );
+        }
+      } catch (e) {
+        print(e);
       }
-    } catch (e) {
-      print(e);
+      return buildList;
     }
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -184,20 +185,17 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            ListView(
+              shrinkWrap: true,
+              padding: const EdgeInsets.all(8),
+              children: getPasswords(),
+            ),
             // Text(test()),
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
-        tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
