@@ -9,7 +9,40 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(MaterialApp(
+    title: 'Navigation Basics',
+    home: MyApp(),
+  ));
+  // MyApp());
+}
+
+class FirstRoute extends StatelessWidget {
+  FirstRoute({this.list, this.worked});
+
+  final bool worked;
+  final List<Widget> list;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('First Route'),
+      ),
+      body: Center(
+        child: ListView(
+          shrinkWrap: true,
+          padding: const EdgeInsets.all(8),
+          children: list,
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          print('hi');
+        },
+        child: Icon(Icons.add),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -19,19 +52,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
-        // This makes the visual density adapt to the platform that you run
-        // the app on. For desktop platforms, the controls will be smaller and
-        // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
@@ -42,51 +63,28 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-// class PasswordRegistryElement {
-//   final String title;
-//   final String content;
-
-//   PasswordRegistryElement(this.title, this.content});
-
-//   factory PasswordRegistryElement.fromJson(Map<String, dynamic> json) {
-//     return PasswordRegistryElement(
-//       title: json['title'] as String,
-//       content: json['content'] as String,
-//     );
-//   }
-// }
-
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  void _incrementCounter() {}
-
   String readText;
-  void getPath() async {
-    await _read().then((String result) {
-      if (readText == null && result != 'bruh') {
-        setState(() {
-          readText = result;
-        });
-      }
-    });
-  }
+  var crypt = AesCrypt('');
+  final _formKey = GlobalKey<FormState>();
+  bool correctPassword = false;
+  String failMessage = '';
 
-  var crypt = AesCrypt('my cool passwor');
+  // void getPath() async {
+  //   await _read().then((String result) {
+  //     if (readText == null && result != 'bruh') {
+  //       setState(() {
+  //         readText = result;
+  //       });
+  //     }
+  //   });
+  // }
 
   _write(String text) async {
     final Directory directory = await getApplicationDocumentsDirectory();
@@ -107,57 +105,39 @@ class _MyHomePageState extends State<MyHomePage> {
       return 'bruh';
     }
   }
-  // Future<File> get _localFile async {
-  //   final path = await _localPath;
 
-  //   return new File('$path/testfile.txt.aes');
-  // }
+  List<Widget> buildList;
 
-  // void init() async {
-  //   final file = await _localFile;
-  //   // Write the file.
-  //   file.writeAsString('');
-  // }
-
-  // // // String _debug1;
-  // // // String _debug2;
-
-  // String test() {
-  //   init();
-  //   var crypt = AesCrypt('my cool password');
-  //   String encFilepath = '';
-  //   String srcText = 'some text';
-  //   String decText = '';
-  //   // encFilepath = crypt.encryptTextToFileSync(srcText, _localFile, utf16: true);
-  //   decText = crypt.decryptTextFromFileSync(encFilepath, utf16: true);
-  //   return encFilepath;
-  // }
+  void getPasswords() async {
+    try {
+      // await getPath();
+      print('got here!');
+      Map<String, dynamic> row = jsonDecode(await _read());
+      correctPassword = true;
+      for (int i = 0; i < row['elements'].length; i++) {
+        print(
+            '${row['elements'][i]['title']} : ${row['elements'][i]['content']}');
+        buildList.add(
+          Container(
+            height: 50,
+            color: Colors.amber[600],
+            child: Center(
+                child: Text(
+                    '${row['elements'][i]['title']} : ${row['elements'][i]['content']}')),
+          ),
+        );
+      }
+    } catch (e) {
+      correctPassword = false;
+      print(e);
+    }
+    print(buildList);
+  }
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> getPasswords() {
-      List<Widget> buildList = [];
-      try {
-        // _write(
-        //     '{"elements" : [{"title": "John Smith", "content": "john@example.com"},{"title": "mike", "content": "password"}, {"title": "hugh", "content": "password2"}]}');
-        getPath();
-        Map<String, dynamic> row = jsonDecode(readText);
-        for (int i = 0; i < row['elements'].length; i++) {
-          buildList.add(
-            Container(
-              height: 50,
-              color: Colors.amber[600],
-              child: Center(
-                  child: Text(
-                      '${row['elements'][i]['title']} : ${row['elements'][i]['content']}')),
-            ),
-          );
-        }
-      } catch (e) {
-        print(e);
-      }
-      return buildList;
-    }
+    // _write(
+    //     '{"elements" : [{"title": "John Smith", "content": "john@example.com"},{"title": "mike", "content": "password"}, {"title": "hugh", "content": "password2"}]}');
 
     return Scaffold(
       appBar: AppBar(
@@ -169,35 +149,58 @@ class _MyHomePageState extends State<MyHomePage> {
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(8),
-              children: getPasswords(),
-            ),
-            // Text(test()),
+            Form(
+                key: _formKey,
+                child: Column(children: [
+                  TextFormField(
+                      decoration: const InputDecoration(
+                        hintText: 'Enter your email',
+                      ),
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter some text';
+                        }
+                      },
+                      onSaved: (val) => setState(() => crypt = AesCrypt(val))),
+                  Text(
+                    failMessage,
+                    style: TextStyle(
+                      color: Colors.red,
+                    ),
+                  ),
+                  ElevatedButton(
+                    child: Text('Open route'),
+                    onPressed: () async {
+                      final form = _formKey.currentState;
+                      if (form.validate()) {
+                        form.save();
+                        buildList = [];
+                        await getPasswords();
+                        List<Widget> passwords = buildList;
+                        if (correctPassword) {
+                          setState(() {
+                            failMessage = '';
+                          });
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      FirstRoute(list: passwords)));
+                          // Navigate to second route when tapped.
+                        } else {
+                          setState(() {
+                            failMessage = 'incorrect password';
+                          });
+                        }
+                      }
+                    },
+                  ),
+                ]))
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
