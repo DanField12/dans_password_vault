@@ -37,10 +37,94 @@ class FirstRoute extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          print('hi');
+          Navigator.push(
+              context, MaterialPageRoute(builder: (context) => CreateEntry()));
         },
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class CreateEntry extends StatelessWidget {
+  final _formKey = GlobalKey<FormState>();
+  void _showExitDialog(BuildContext context) async {
+    // flutter defined function
+    BuildContext greaterContext = context;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // return object of type Dialog
+        return AlertDialog(
+          title: Text("Alert Dialog title"),
+          content: Text(
+              "Are you sure you want to go back, your entry will NOT be saved?"),
+          actions: <Widget>[
+            // usually buttons at the bottom of the dialog
+            FlatButton(
+              child: Text("Yes"),
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pop(greaterContext);
+              },
+            ),
+            FlatButton(
+              child: Text("No"),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new WillPopScope(
+      onWillPop: () async {
+        _showExitDialog(context);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('First Route'),
+        ), // This trailing comma makes auto-formatting nicer for build methods.
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          // Center is a layout widget. It takes a single child and positions it
+          // in the middle of the parent.
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Form(
+                  key: _formKey,
+                  child: Column(children: [
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        hintText: 'Enter your email',
+                      ),
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter some text';
+                        }
+                      },
+
+                      // onSaved: (val) =>
+                    ),
+                    ElevatedButton(
+                      child: Text('Open route'),
+                      onPressed: () async {
+                        final form = _formKey.currentState;
+                        if (form.validate()) {}
+                      },
+                    ),
+                  ]))
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -75,16 +159,6 @@ class _MyHomePageState extends State<MyHomePage> {
   final _formKey = GlobalKey<FormState>();
   bool correctPassword = false;
   String failMessage = '';
-
-  // void getPath() async {
-  //   await _read().then((String result) {
-  //     if (readText == null && result != 'bruh') {
-  //       setState(() {
-  //         readText = result;
-  //       });
-  //     }
-  //   });
-  // }
 
   _write(String text) async {
     final Directory directory = await getApplicationDocumentsDirectory();
@@ -145,7 +219,8 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
