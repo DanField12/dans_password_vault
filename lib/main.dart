@@ -1,11 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'dart:typed_data';
-import 'package:aes_crypt/aes_crypt.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:developer' as developer;
-import 'dart:async';
-import 'dart:io';
+
+import 'authenticate.dart';
 import 'package:flutter/foundation.dart';
 
 void main() {
@@ -46,6 +43,11 @@ class FirstRoute extends StatelessWidget {
   }
 }
 
+class Entry {
+  String title;
+  String content;
+}
+
 class CreateEntry extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
   void _showExitDialog(BuildContext context) async {
@@ -82,6 +84,7 @@ class CreateEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _entry = Entry();
     return new WillPopScope(
       onWillPop: () async {
         _showExitDialog(context);
@@ -103,7 +106,20 @@ class CreateEntry extends StatelessWidget {
                   child: Column(children: [
                     TextFormField(
                       decoration: const InputDecoration(
-                        hintText: 'Enter your email',
+                        hintText:
+                            'Enter the website whose password you want to store',
+                      ),
+                      validator: (value) {
+                        if (value.isEmpty) {
+                          return 'Please enter some text';
+                        }
+                      },
+                      // onSaved: (val) => setState(() => crypt = AesCrypt(val))),
+                      // onSaved: (val) =>
+                    ),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        hintText: 'Enter your password for this website',
                       ),
                       validator: (value) {
                         if (value.isEmpty) {
@@ -154,62 +170,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String readText;
-  var crypt = AesCrypt('');
-  final _formKey = GlobalKey<FormState>();
-  bool correctPassword = false;
-  String failMessage = '';
-
-  _write(String text) async {
-    final Directory directory = await getApplicationDocumentsDirectory();
-    crypt.setOverwriteMode(AesCryptOwMode.on);
-    crypt.encryptTextToFileSync(text, '${directory.path}/testfile.txt.aes',
-        utf16: true);
-  }
-
-  Future<String> _read() async {
-    String text;
-    try {
-      final Directory directory = await getApplicationDocumentsDirectory();
-      text = crypt.decryptTextFromFileSync('${directory.path}/testfile.txt.aes',
-          utf16: true);
-      return text;
-    } catch (e) {
-      print("Couldn't read file");
-      return 'bruh';
-    }
-  }
-
   List<Widget> buildList;
-
-  void getPasswords() async {
-    try {
-      // await getPath();
-      print('got here!');
-      Map<String, dynamic> row = jsonDecode(await _read());
-      correctPassword = true;
-      for (int i = 0; i < row['elements'].length; i++) {
-        print(
-            '${row['elements'][i]['title']} : ${row['elements'][i]['content']}');
-        buildList.add(
-          Container(
-            height: 50,
-            color: Colors.amber[600],
-            child: Center(
-                child: Text(
-                    '${row['elements'][i]['title']} : ${row['elements'][i]['content']}')),
-          ),
-        );
-      }
-    } catch (e) {
-      correctPassword = false;
-      print(e);
-    }
-    print(buildList);
-  }
+  String formEntry;
+  var _authenticator = new Authenticator();
 
   @override
   Widget build(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
     // _write(
     //     '{"elements" : [{"title": "John Smith", "content": "john@example.com"},{"title": "mike", "content": "password"}, {"title": "hugh", "content": "password2"}]}');
 
@@ -238,40 +205,38 @@ class _MyHomePageState extends State<MyHomePage> {
                           return 'Please enter some text';
                         }
                       },
-                      onSaved: (val) => setState(() => crypt = AesCrypt(val))),
-                  Text(
-                    failMessage,
-                    style: TextStyle(
-                      color: Colors.red,
-                    ),
-                  ),
+                      onSaved: (val) => setState(() => formEntry = val)),
+                  // Text(
+                  //   failMessage,
+                  //   style: TextStyle(
+                  //     color: Colors.red,
+                  //   ),
+                  // ),
                   ElevatedButton(
-                    child: Text('Open route'),
-                    onPressed: () async {
-                      final form = _formKey.currentState;
-                      if (form.validate()) {
-                        form.save();
-                        buildList = [];
-                        await getPasswords();
-                        List<Widget> passwords = buildList;
-                        if (correctPassword) {
-                          setState(() {
-                            failMessage = '';
-                          });
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      FirstRoute(list: passwords)));
-                          // Navigate to second route when tapped.
-                        } else {
-                          setState(() {
-                            failMessage = 'incorrect password';
-                          });
+                      child: Text('Open route'),
+                      onPressed: () async {
+                        final form = _formKey.currentState;
+                        if (form.validate()) {
+                          form.save();
+                          buildList = [];
+                          await _authenticator.authenticate(formEntry);
+                          await _authenticator.passwords;
+                          List<Widget> passwords = buildList;
+                          if (await _authenticator.authenticated) {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        FirstRoute(list: passwords)));
+                            // Navigate to second route when tapped.
+                            // } else {
+                            //   setState(() {
+                            //     failMessage = 'incorrect password';
+                            //   });
+                            // }
+                          }
                         }
-                      }
-                    },
-                  ),
+                      })
                 ]))
           ],
         ),
