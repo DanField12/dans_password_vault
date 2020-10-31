@@ -15,7 +15,7 @@ class HomePage extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'MyVault Login'),
     );
   }
 }
@@ -53,6 +53,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 key: _formKey,
                 child: Column(children: [
                   TextFormField(
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      obscureText: true,
                       decoration: const InputDecoration(
                         hintText: 'Enter your password',
                       ),
@@ -71,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   ElevatedButton(
-                      child: Text('Open route'),
+                      child: Text('Login'),
                       onPressed: () async {
                         final form = _formKey.currentState;
                         if (form.validate()) {

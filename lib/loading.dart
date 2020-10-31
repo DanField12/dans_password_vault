@@ -9,23 +9,20 @@ class Dialogs {
         builder: (BuildContext context) {
           return new WillPopScope(
               onWillPop: () async => false,
-              child: SimpleDialog(
-                  key: key,
-                  backgroundColor: Colors.black54,
-                  children: <Widget>[
-                    Center(
-                      child: Column(children: [
-                        CircularProgressIndicator(),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          "Please Wait....",
-                          style: TextStyle(color: Colors.blueAccent),
-                        )
-                      ]),
+              child: SimpleDialog(key: key, children: <Widget>[
+                Center(
+                  child: Column(children: [
+                    CircularProgressIndicator(),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Please Wait....",
+                      style: TextStyle(color: Colors.blueAccent),
                     )
-                  ]));
+                  ]),
+                )
+              ]));
         });
   }
 }
