@@ -27,19 +27,38 @@ class FirstRoute extends StatelessWidget {
       List<Widget> buildList = [];
       for (int i = 0; i < row['elements'].length; i++) {
         buildList.add(InkWell(
-          onLongPress: () {
+          child: ListTile(
+              leading: Image.network(
+                'https://${row['elements'][i]['websiteURL']}/favicon.ico',
+                height: 32,
+                width: 32,
+              ),
+              title: Text('${row['elements'][i]['title']}'),
+              subtitle: Text('${row['elements'][i]['websiteURL']}'),
+              trailing: PopupMenuButton(
+                itemBuilder: (BuildContext context) {
+                  return [
+                    PopupMenuItem(
+                      child: Text('edit'),
+                    )
+                  ];
+                },
+                icon: Icon(Icons.more_vert),
+              )),
+          onTap: () {
             Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => DetailsPage(
-                          content: '${row['elements'][i]['content']}',
+                          pageTitle: '${row['elements'][i]['title']}',
+                          content: '${row['elements'][i]['username']}',
                           password: '${row['elements'][i]['password']}',
                         )));
           },
-          child: Container(
-            height: 50,
-            child: Center(child: Text('${row['elements'][i]['websiteURL']}')),
-          ),
+          // child: Container(
+          //   height: 50,
+          //   child: Center(child: Text('${row['elements'][i]['websiteURL']}')),
+          // ),
         ));
       }
       return buildList;
@@ -68,9 +87,10 @@ class FirstRoute extends StatelessWidget {
 }
 
 class Entry {
-  String websiteURL;
   String title;
-  String content;
+  String websiteURL;
+  String username;
+  String password;
 }
 
 class CreateEntry extends StatelessWidget {

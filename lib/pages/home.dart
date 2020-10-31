@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 
 import '../authenticate.dart';
 import '../main.dart';
+import '../loading.dart';
 
 class HomePage extends StatelessWidget {
   // This widget is the root of your application.
@@ -31,13 +32,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<Widget> buildList;
   String formEntry;
+  String failMessage = '';
   var _authenticator = new Authenticator();
+  final GlobalKey<State> _keyLoader = new GlobalKey<State>();
 
   @override
   Widget build(BuildContext context) {
     final _formKey = GlobalKey<FormState>();
-    // _write(
-    //     '{"elements" : [{"title": "John Smith", "content": "john@example.com"},{"title": "mike", "content": "password"}, {"title": "hugh", "content": "password2"}]}');
 
     return Scaffold(
       appBar: AppBar(
@@ -53,20 +54,22 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Column(children: [
                   TextFormField(
                       decoration: const InputDecoration(
-                        hintText: 'Enter your email',
+                        hintText: 'Enter your password',
                       ),
                       validator: (value) {
                         if (value.isEmpty) {
-                          return 'Please enter some text';
+                          setState(() {
+                            failMessage = 'Please enter your password';
+                          });
                         }
                       },
                       onSaved: (val) => setState(() => formEntry = val)),
-                  // Text(
-                  //   failMessage,
-                  //   style: TextStyle(
-                  //     color: Colors.red,
-                  //   ),
-                  // ),
+                  Text(
+                    failMessage,
+                    style: TextStyle(
+                      color: Colors.red,
+                    ),
+                  ),
                   ElevatedButton(
                       child: Text('Open route'),
                       onPressed: () async {
@@ -74,21 +77,25 @@ class _MyHomePageState extends State<MyHomePage> {
                         if (form.validate()) {
                           form.save();
                           buildList = [];
+                          print(formEntry);
+                          Dialogs.showLoadingDialog(context, _keyLoader);
                           await _authenticator.authenticate(formEntry);
-                          String passwords = await _authenticator.passwords;
-                          if (await _authenticator.authenticated) {
+                          Navigator.of(_keyLoader.currentContext,
+                                  rootNavigator: true)
+                              .pop();
+                          if (_authenticator.authenticated) {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) =>
-                                        FirstRoute(list: passwords)));
+                                    builder: (context) => FirstRoute(
+                                        list: _authenticator.passwords)));
                             // Navigate to second route when tapped.
-                            // } else {
-                            //   setState(() {
-                            //     failMessage = 'incorrect password';
-                            //   });
-                            // }
+                          } else if (formEntry != '') {
+                            setState(() {
+                              failMessage = 'Incorrect password';
+                            });
                           }
+                          formEntry = '';
                         }
                       })
                 ]))
