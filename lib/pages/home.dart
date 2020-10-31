@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import '../authenticate.dart';
+import '../json_parse.dart';
 import '../main.dart';
 import '../loading.dart';
 
@@ -87,11 +88,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                   rootNavigator: true)
                               .pop();
                           if (_authenticator.authenticated) {
+                            EntryList passwordList = new EntryList();
+                            passwordList.listAsJSON = _authenticator.passwords;
+                            passwordList.decodeEntries();
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => FirstRoute(
-                                        list: _authenticator.passwords)));
+                                        list: passwordList.decodedList)));
                             // Navigate to second route when tapped.
                           } else if (formEntry != '') {
                             setState(() {

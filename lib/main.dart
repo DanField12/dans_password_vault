@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 
 import 'authenticate.dart';
 import 'package:flutter/foundation.dart';
+import 'json_parse.dart';
 import 'pages/details.dart';
 import 'pages/home.dart';
 import 'exit_alert.dart';
@@ -19,23 +20,23 @@ void main() {
 class FirstRoute extends StatelessWidget {
   FirstRoute({this.list});
 
-  String list;
+  List<Entry> list;
 
   @override
   Widget build(BuildContext context) {
     List<Widget> buildList() {
-      Map<String, dynamic> row = jsonDecode(list);
+      // Map<String, dynamic> row = jsonDecode(list);
       List<Widget> buildList = [];
-      for (int i = 0; i < row['elements'].length; i++) {
+      for (int i = 0; i < list.length; i++) {
         buildList.add(InkWell(
           child: ListTile(
               leading: Image.network(
-                'https://${row['elements'][i]['websiteURL']}/favicon.ico',
+                'https://${list[i].websiteURL}/favicon.ico',
                 height: 32,
                 width: 32,
               ),
-              title: Text('${row['elements'][i]['title']}'),
-              subtitle: Text('${row['elements'][i]['websiteURL']}'),
+              title: Text('${list[i].title}'),
+              subtitle: Text('${list[i].websiteURL}'),
               trailing: PopupMenuButton(
                 itemBuilder: (BuildContext context) {
                   return [
@@ -51,9 +52,9 @@ class FirstRoute extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                     builder: (context) => DetailsPage(
-                          pageTitle: '${row['elements'][i]['title']}',
-                          content: '${row['elements'][i]['username']}',
-                          password: '${row['elements'][i]['password']}',
+                          pageTitle: '${list[i].title}',
+                          content: '${list[i].username}',
+                          password: '${list[i].password}',
                         )));
           },
           // child: Container(
@@ -94,19 +95,11 @@ class FirstRoute extends StatelessWidget {
   }
 }
 
-class Entry {
-  String title;
-  String websiteURL;
-  String username;
-  String password;
-}
-
 class CreateEntry extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
-    final _entry = Entry();
     return new WillPopScope(
       onWillPop: () async {
         ExitDialogue.showExitDialog(context,
@@ -129,8 +122,7 @@ class CreateEntry extends StatelessWidget {
                   child: Column(children: [
                     TextFormField(
                       decoration: const InputDecoration(
-                        hintText:
-                            'Enter the website whose password you want to store',
+                        hintText: 'Enter the website',
                       ),
                       validator: (value) {
                         if (value.isEmpty) {
@@ -155,8 +147,19 @@ class CreateEntry extends StatelessWidget {
                     ElevatedButton(
                       child: Text('Open route'),
                       onPressed: () async {
-                        final form = _formKey.currentState;
-                        if (form.validate()) {}
+                        // final form = _formKey.currentState;
+                        // if (form.validate()) {}
+                        var _authenticator = new Authenticator();
+                        await _authenticator.authenticate('my password');
+                        EntryList passwordList = new EntryList();
+                        passwordList.listAsJSON = _authenticator.passwords;
+                        passwordList.decodeEntries();
+                        passwordList.addEntry('hi', 'hi', 'hi', 'hi');
+                        Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    FirstRoute(list: passwordList.decodedList)),
+                            (Route<dynamic> route) => false);
                       },
                     ),
                   ]))
