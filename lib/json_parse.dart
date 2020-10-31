@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:dans_password_vault/authenticate.dart';
+
 class Entry {
   Entry({this.title, this.password, this.username, this.websiteURL});
   int id;
@@ -35,8 +37,8 @@ class EntryList {
     decodedList = list;
   }
 
-  void addEntry(
-      String title, String username, String websiteURL, String password) {
+  Future<void> addEntry(String title, String username, String websiteURL,
+      String password, String secretKey) async {
     decodedList.add(new Entry(
         title: title,
         username: username,
@@ -44,5 +46,10 @@ class EntryList {
         password: password));
     listAsJSON = '{"elements": ${jsonEncode(decodedList)}}';
     print(listAsJSON);
+    Authenticator _authenticator = new Authenticator();
+    await _authenticator.write(secretKey, listAsJSON);
+    print(secretKey);
   }
+
+  void removeEntry() {}
 }

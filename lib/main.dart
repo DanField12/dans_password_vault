@@ -150,16 +150,25 @@ class CreateEntry extends StatelessWidget {
                         // final form = _formKey.currentState;
                         // if (form.validate()) {}
                         var _authenticator = new Authenticator();
-                        await _authenticator.authenticate('my password');
+                        await _authenticator.authenticate('a');
                         EntryList passwordList = new EntryList();
                         passwordList.listAsJSON = _authenticator.passwords;
                         passwordList.decodeEntries();
-                        passwordList.addEntry('hi', 'hi', 'hi', 'hi');
-                        Navigator.of(context).pushAndRemoveUntil(
+                        print(_authenticator.passwords);
+                        await passwordList.addEntry(
+                            'hi', 'hi', 'hi', 'hi', 'a');
+                        Navigator.popUntil(
+                            context, (Route<dynamic> route) => false);
+                        Navigator.push(
+                            context,
                             MaterialPageRoute(
-                                builder: (context) =>
-                                    FirstRoute(list: passwordList.decodedList)),
-                            (Route<dynamic> route) => false);
+                                builder: (context) => HomePage()));
+
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => FirstRoute(
+                                    list: passwordList.decodedList)));
                       },
                     ),
                   ]))
