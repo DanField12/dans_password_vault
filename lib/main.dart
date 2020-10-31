@@ -4,23 +4,47 @@ import 'dart:developer' as developer;
 
 import 'authenticate.dart';
 import 'package:flutter/foundation.dart';
+import 'pages/details.dart';
+import 'pages/home.dart';
 
 void main() {
   runApp(MaterialApp(
-    title: 'Navigation Basics',
-    home: MyApp(),
+    title: '',
+    home: HomePage(),
   ));
   // MyApp());
 }
 
 class FirstRoute extends StatelessWidget {
-  FirstRoute({this.list, this.worked});
+  FirstRoute({this.list});
 
-  final bool worked;
-  final List<Widget> list;
+  String list;
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> buildList() {
+      Map<String, dynamic> row = jsonDecode(list);
+      List<Widget> buildList = [];
+      for (int i = 0; i < row['elements'].length; i++) {
+        buildList.add(InkWell(
+          onLongPress: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => DetailsPage(
+                          content: '${row['elements'][i]['content']}',
+                          password: '${row['elements'][i]['password']}',
+                        )));
+          },
+          child: Container(
+            height: 50,
+            child: Center(child: Text('${row['elements'][i]['websiteURL']}')),
+          ),
+        ));
+      }
+      return buildList;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('First Route'),
@@ -29,7 +53,7 @@ class FirstRoute extends StatelessWidget {
         child: ListView(
           shrinkWrap: true,
           padding: const EdgeInsets.all(8),
-          children: list,
+          children: buildList(),
         ),
       ),
       floatingActionButton: FloatingActionButton(
@@ -44,6 +68,7 @@ class FirstRoute extends StatelessWidget {
 }
 
 class Entry {
+  String websiteURL;
   String title;
   String content;
 }
@@ -139,106 +164,6 @@ class CreateEntry extends StatelessWidget {
                   ]))
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  List<Widget> buildList;
-  String formEntry;
-  var _authenticator = new Authenticator();
-
-  @override
-  Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
-    // _write(
-    //     '{"elements" : [{"title": "John Smith", "content": "john@example.com"},{"title": "mike", "content": "password"}, {"title": "hugh", "content": "password2"}]}');
-
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Form(
-                key: _formKey,
-                child: Column(children: [
-                  TextFormField(
-                      decoration: const InputDecoration(
-                        hintText: 'Enter your email',
-                      ),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please enter some text';
-                        }
-                      },
-                      onSaved: (val) => setState(() => formEntry = val)),
-                  // Text(
-                  //   failMessage,
-                  //   style: TextStyle(
-                  //     color: Colors.red,
-                  //   ),
-                  // ),
-                  ElevatedButton(
-                      child: Text('Open route'),
-                      onPressed: () async {
-                        final form = _formKey.currentState;
-                        if (form.validate()) {
-                          form.save();
-                          buildList = [];
-                          await _authenticator.authenticate(formEntry);
-                          await _authenticator.passwords;
-                          List<Widget> passwords = buildList;
-                          if (await _authenticator.authenticated) {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        FirstRoute(list: passwords)));
-                            // Navigate to second route when tapped.
-                            // } else {
-                            //   setState(() {
-                            //     failMessage = 'incorrect password';
-                            //   });
-                            // }
-                          }
-                        }
-                      })
-                ]))
-          ],
         ),
       ),
     );

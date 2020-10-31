@@ -7,14 +7,17 @@ class Authenticator {
   String passwords;
   bool authenticated = false;
 
-// _write(String text) async {
-//   final Directory directory = await getApplicationDocumentsDirectory();
-//   crypt.setOverwriteMode(AesCryptOwMode.on);
-//   crypt.encryptTextToFileSync(text, '${directory.path}/testfile.txt.aes',
-//       utf16: true);
-// }
+  _write(String secretKey, String text) async {
+    final Directory directory = await getApplicationDocumentsDirectory();
+    var crypt = AesCrypt(secretKey);
+    crypt.setOverwriteMode(AesCryptOwMode.on);
+    crypt.encryptTextToFileSync(text, '${directory.path}/testfile.txt.aes',
+        utf16: true);
+  }
 
   Future<void> authenticate(String secretKey) async {
+    await _write(secretKey,
+        '{"elements": [{"websiteURL": "google.com", "content": "bob", "password": "mypassword1"},{"websiteURL": "store.steampowered.com", "content": "bob6969", "password": "mypassword2"},{"websiteURL": "apple.com", "content": "david12", "password": "mypassword3"}]}');
     passwords = await readFile(secretKey);
     authenticated = (passwords != 'Error');
   }
