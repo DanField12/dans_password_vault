@@ -6,6 +6,7 @@ import 'authenticate.dart';
 import 'package:flutter/foundation.dart';
 import 'pages/details.dart';
 import 'pages/home.dart';
+import 'exit_alert.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -64,24 +65,31 @@ class FirstRoute extends StatelessWidget {
       return buildList;
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('First Route'),
-      ),
-      body: Center(
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.all(8),
-          children: buildList(),
+    return new WillPopScope(
+      onWillPop: () async {
+        ExitDialogue.showExitDialog(
+            context, 'Are you sure you want to log out.');
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('First Route'),
         ),
+        body: Center(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(8),
+            children: buildList(),
+          ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => CreateEntry()));
+          },
+          child: Icon(Icons.add),
+        ), // This trailing comma makes auto-formatting nicer for build methods.
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (context) => CreateEntry()));
-        },
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
@@ -95,44 +103,14 @@ class Entry {
 
 class CreateEntry extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
-  void _showExitDialog(BuildContext context) async {
-    // flutter defined function
-    BuildContext greaterContext = context;
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // return object of type Dialog
-        return AlertDialog(
-          title: Text("Alert Dialog title"),
-          content: Text(
-              "Are you sure you want to go back, your entry will NOT be saved?"),
-          actions: <Widget>[
-            // usually buttons at the bottom of the dialog
-            FlatButton(
-              child: Text("Yes"),
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(greaterContext);
-              },
-            ),
-            FlatButton(
-              child: Text("No"),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     final _entry = Entry();
     return new WillPopScope(
       onWillPop: () async {
-        _showExitDialog(context);
+        ExitDialogue.showExitDialog(context,
+            'Are you sure you want to go back, your entry will NOT be saved.');
         return false;
       },
       child: Scaffold(
