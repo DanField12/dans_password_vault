@@ -5,6 +5,7 @@ import 'dart:developer' as developer;
 import 'authenticate.dart';
 import 'package:flutter/foundation.dart';
 import 'json_parse.dart';
+import 'loading.dart';
 import 'pages/details.dart';
 import 'pages/home.dart';
 import 'exit_alert.dart';
@@ -17,13 +18,33 @@ void main() {
   // MyApp());
 }
 
-class FirstRoute extends StatelessWidget {
-  FirstRoute({this.list});
+class MyDemo extends StatefulWidget {
+  MyDemo({this.list});
+  List<Entry> list;
 
+  @override
+  FirstRoute createState() => FirstRoute(list: list);
+}
+
+class FirstRoute extends State<MyDemo> {
+  FirstRoute({this.list});
   List<Entry> list;
 
   @override
   Widget build(BuildContext context) {
+    Future<void> delete(int id) async {
+      await ExitDialogue.showConfirm(
+          context, 'Are you sure you want to delete this.', () {
+        var myList = new EntryList();
+        setState(() {
+          list.removeAt(id);
+          print('deleted');
+        });
+        myList.decodedList = list;
+        myList.setEntries('a');
+      });
+    }
+
     List<Widget> buildList() {
       // Map<String, dynamic> row = jsonDecode(list);
       List<Widget> buildList = [];
@@ -41,7 +62,17 @@ class FirstRoute extends StatelessWidget {
                 itemBuilder: (BuildContext context) {
                   return [
                     PopupMenuItem(
-                      child: Text('edit'),
+                      child: InkWell(
+                        child: Container(child: Text('Delete')),
+                        onTap: () {
+                          delete(i);
+                        },
+                      ),
+                    ),
+                    PopupMenuItem(
+                      child: InkWell(
+                        child: Container(child: Text('Edit')),
+                      ),
                     )
                   ];
                 },
@@ -97,6 +128,7 @@ class FirstRoute extends StatelessWidget {
 
 class CreateEntry extends StatelessWidget {
   final _formKey = GlobalKey<FormState>();
+  final GlobalKey<State> _keyLoader = new GlobalKey<State>();
 
   @override
   Widget build(BuildContext context) {
@@ -150,6 +182,7 @@ class CreateEntry extends StatelessWidget {
                         // final form = _formKey.currentState;
                         // if (form.validate()) {}
                         var _authenticator = new Authenticator();
+                        Dialogs.showLoadingDialog(context, _keyLoader);
                         await _authenticator.authenticate('a');
                         EntryList passwordList = new EntryList();
                         passwordList.listAsJSON = _authenticator.passwords;
@@ -157,6 +190,9 @@ class CreateEntry extends StatelessWidget {
                         print(_authenticator.passwords);
                         await passwordList.addEntry(
                             'hi', 'hi', 'hi', 'hi', 'a');
+                        Navigator.of(_keyLoader.currentContext,
+                                rootNavigator: true)
+                            .pop();
                         Navigator.popUntil(
                             context, (Route<dynamic> route) => false);
                         Navigator.push(
@@ -167,8 +203,8 @@ class CreateEntry extends StatelessWidget {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => FirstRoute(
-                                    list: passwordList.decodedList)));
+                                builder: (context) =>
+                                    MyDemo(list: passwordList.decodedList)));
                       },
                     ),
                   ]))

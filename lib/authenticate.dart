@@ -19,9 +19,9 @@ class Authenticator {
   Future<void> authenticate(String secretKey) async {
     // await write('a',
     //     '{"elements": [{"title": "Google","websiteURL": "google.com", "username": "bob", "password": "mypassword1"},{"title": "Steam" ,"websiteURL": "store.steampowered.com", "username": "bob6969", "password": "mypassword2"},{"title" : "Apple","websiteURL": "apple.com", "username": "david12", "password": "mypassword3"}]}');
-    // await Future.delayed(Duration(seconds: 5), () async {
-    passwords = await readFile(secretKey);
-    // });
+    await Future.delayed(Duration(seconds: 5), () async {
+      passwords = await readFile(secretKey);
+    });
     authenticated = (passwords != 'Error');
   }
 

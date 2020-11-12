@@ -44,12 +44,13 @@ class EntryList {
         username: username,
         websiteURL: websiteURL,
         password: password));
+    setEntries(secretKey);
+  }
+
+  Future<void> setEntries(String secretKey) async {
     listAsJSON = '{"elements": ${jsonEncode(decodedList)}}';
     print(listAsJSON);
     Authenticator _authenticator = new Authenticator();
     await _authenticator.write(secretKey, listAsJSON);
-    print(secretKey);
   }
-
-  void removeEntry() {}
 }
