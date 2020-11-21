@@ -7,7 +7,7 @@ import '../main.dart';
 import '../loading.dart';
 import 'register.dart';
 
-class HomePage extends StatelessWidget {
+class RegisterPage extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -17,21 +17,21 @@ class HomePage extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'MyVault Login'),
+      home: _RegisterPage(title: 'MyVault Login'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class _RegisterPage extends StatefulWidget {
+  _RegisterPage({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _RegisterPageState createState() => _RegisterPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _RegisterPageState extends State<_RegisterPage> {
   List<Widget> buildList;
   String passwordEntry = '';
   String emailEntry = '';
@@ -89,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   ElevatedButton(
-                      child: Text('Login'),
+                      child: Text('Create'),
                       onPressed: () async {
                         final form = _formKey.currentState;
                         if (form.validate()) {
@@ -97,46 +97,28 @@ class _MyHomePageState extends State<MyHomePage> {
                           form.save();
 
                           Dialogs.showLoadingDialog(context, _keyLoader);
-                          await _authenticator.authenticate(
-                              secretKey: passwordEntry,
-                              emailIdentifier: emailEntry);
-                          await _authenticator.readFile(
-                              secretKey: passwordEntry,
-                              emailIdentifier: emailEntry);
+                          await _authenticator.initNewUser(
+                              passwordEntry, emailEntry);
                           Navigator.of(_keyLoader.currentContext,
                                   rootNavigator: true)
                               .pop();
-                          if (_authenticator.authenticated) {
-                            EntryList passwordList = new EntryList();
-                            if (_authenticator.passwords != null) {
-                              passwordList.listAsJSON =
-                                  _authenticator.passwords;
-                              passwordList.decodeEntries();
-                            }
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MyDemo(
-                                          list: passwordList.decodedList,
-                                          email: emailEntry,
-                                          secret: passwordEntry,
-                                        )));
-                            // Navigate to second route when tapped.
-                          } else if (passwordEntry != '') {
-                            setState(() {
-                              failMessage = 'Incorrect password';
-                            });
-                          }
+                          EntryList passwordList = new EntryList();
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MyDemo(
+                                        list: passwordList.decodedList,
+                                        email: emailEntry,
+                                        secret: passwordEntry,
+                                      )));
+                          // Navigate to second route when tapped.
+                        } else if (passwordEntry != '') {
+                          setState(() {
+                            failMessage = 'Incorrect password';
+                          });
                         }
+                        passwordEntry = '';
                       }),
-                  ElevatedButton(
-                      child: Text('Register'),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => RegisterPage()));
-                      })
                 ]))
           ],
         ),

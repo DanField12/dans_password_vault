@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'json_parse.dart';
 import 'loading.dart';
 import 'pages/details.dart';
-import 'pages/home.dart';
+import 'pages/login.dart';
 import 'exit_alert.dart';
 
 void main() {
@@ -19,19 +19,26 @@ void main() {
 }
 
 class MyDemo extends StatefulWidget {
-  MyDemo({this.list});
-  List<Entry> list;
+  MyDemo({this.list, this.email, this.secret});
+  final String email;
+  final String secret;
+  final List<Entry> list;
 
   @override
-  FirstRoute createState() => FirstRoute(list: list);
+  FirstRoute createState() =>
+      FirstRoute(email: email, secretKey: secret, list: list);
 }
 
 class FirstRoute extends State<MyDemo> {
-  FirstRoute({this.list});
-  List<Entry> list;
+  FirstRoute({this.email, this.secretKey, this.list});
+  final String email;
+  final String secretKey;
+  final List<Entry> list;
 
   @override
   Widget build(BuildContext context) {
+    print('key' + secretKey);
+    print(list);
     Future<void> delete(int id) async {
       await ExitDialogue.showConfirm(
           context, 'Are you sure you want to delete this.', () {
@@ -41,60 +48,65 @@ class FirstRoute extends State<MyDemo> {
           print('deleted');
         });
         myList.decodedList = list;
-        myList.setEntries('a');
+        myList.setEntries(secretKey, email);
       });
     }
 
     List<Widget> buildList() {
       // Map<String, dynamic> row = jsonDecode(list);
       List<Widget> buildList = [];
-      for (int i = 0; i < list.length; i++) {
-        buildList.add(InkWell(
-          child: ListTile(
-              leading: Image.network(
-                'https://${list[i].websiteURL}/favicon.ico',
-                height: 32,
-                width: 32,
-              ),
-              title: Text('${list[i].title}'),
-              subtitle: Text('${list[i].websiteURL}'),
-              trailing: PopupMenuButton(
-                itemBuilder: (BuildContext context) {
-                  return [
-                    PopupMenuItem(
-                      child: InkWell(
-                        child: Container(child: Text('Delete')),
-                        onTap: () {
-                          delete(i);
-                        },
+      if (list != null) {
+        for (int i = 0; i < list.length; i++) {
+          buildList.add(InkWell(
+            child: ListTile(
+                leading: Image.network(
+                  'https://${list[i].websiteURL}/favicon.ico',
+                  height: 32,
+                  width: 32,
+                ),
+                title: Text('${list[i].title}'),
+                subtitle: Text('${list[i].websiteURL}'),
+                trailing: PopupMenuButton(
+                  itemBuilder: (BuildContext context) {
+                    return [
+                      PopupMenuItem(
+                        child: InkWell(
+                          child:
+                              Row(children: [Icon(Icons.edit), Text('Edit')]),
+                        ),
                       ),
-                    ),
-                    PopupMenuItem(
-                      child: InkWell(
-                        child: Container(child: Text('Edit')),
+                      PopupMenuItem(
+                        child: InkWell(
+                          child: Row(
+                              children: [Icon(Icons.delete), Text('Delete')]),
+                          onTap: () {
+                            delete(i);
+                          },
+                        ),
                       ),
-                    )
-                  ];
-                },
-                icon: Icon(Icons.more_vert),
-              )),
-          onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => DetailsPage(
-                          pageTitle: '${list[i].title}',
-                          content: '${list[i].username}',
-                          password: '${list[i].password}',
-                        )));
-          },
-          // child: Container(
-          //   height: 50,
-          //   child: Center(child: Text('${row['elements'][i]['websiteURL']}')),
-          // ),
-        ));
+                    ];
+                  },
+                  icon: Icon(Icons.more_vert),
+                )),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => DetailsPage(
+                            pageTitle: '${list[i].title}',
+                            content: '${list[i].username}',
+                            password: '${list[i].password}',
+                            url: '${list[i].websiteURL}',
+                          )));
+            },
+            // child: Container(
+            //   height: 50,
+            //   child: Center(child: Text('${row['elements'][i]['websiteURL']}')),
+            // ),
+          ));
+        }
+        return buildList;
       }
-      return buildList;
     }
 
     return new WillPopScope(
@@ -116,8 +128,11 @@ class FirstRoute extends State<MyDemo> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => CreateEntry()));
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        Create(email: email, secretKey: secretKey)));
           },
           child: Icon(Icons.add),
         ), // This trailing comma makes auto-formatting nicer for build methods.
@@ -126,9 +141,28 @@ class FirstRoute extends State<MyDemo> {
   }
 }
 
-class CreateEntry extends StatelessWidget {
+class Create extends StatefulWidget {
+  const Create({this.email, this.secretKey});
+  final String email;
+  final String secretKey;
+
+  @override
+  CreateEntry createState() => CreateEntry(secretKey: secretKey, email: email);
+}
+
+class CreateEntry extends State<Create> {
+  CreateEntry({this.email, this.secretKey});
+  final String email;
+  final String secretKey;
+
+  final snackBar = SnackBar(content: Text('New entry added!'));
   final _formKey = GlobalKey<FormState>();
   final GlobalKey<State> _keyLoader = new GlobalKey<State>();
+
+  String website;
+  String title;
+  String username;
+  String password;
 
   @override
   Widget build(BuildContext context) {
@@ -151,63 +185,74 @@ class CreateEntry extends StatelessWidget {
             children: <Widget>[
               Form(
                   key: _formKey,
-                  child: Column(children: [
+                  child: Expanded(
+                      child: Column(children: [
                     TextFormField(
-                      decoration: const InputDecoration(
-                        hintText: 'Enter the website',
-                      ),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please enter some text';
-                        }
-                      },
-                      // onSaved: (val) => setState(() => crypt = AesCrypt(val))),
-                      // onSaved: (val) =>
-                    ),
+                        decoration: const InputDecoration(
+                          labelText: 'Website URL',
+                        ),
+                        onSaved: (val) => setState(() => this.website = val)),
                     TextFormField(
-                      decoration: const InputDecoration(
-                        hintText: 'Enter your password for this website',
-                      ),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          return 'Please enter some text';
-                        }
-                      },
-
-                      // onSaved: (val) =>
-                    ),
+                        decoration: const InputDecoration(
+                          labelText: 'Title',
+                        ),
+                        onSaved: (val) => setState(() => this.title = val)),
+                    TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Username',
+                        ),
+                        onSaved: (val) => setState(() => this.username = val)),
+                    TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Password',
+                        ),
+                        onSaved: (val) => setState(() => this.password = val)),
                     ElevatedButton(
                       child: Text('Open route'),
                       onPressed: () async {
-                        // final form = _formKey.currentState;
-                        // if (form.validate()) {}
-                        var _authenticator = new Authenticator();
-                        Dialogs.showLoadingDialog(context, _keyLoader);
-                        await _authenticator.authenticate('a');
-                        EntryList passwordList = new EntryList();
-                        passwordList.listAsJSON = _authenticator.passwords;
-                        passwordList.decodeEntries();
-                        print(_authenticator.passwords);
-                        await passwordList.addEntry(
-                            'hi', 'hi', 'hi', 'hi', 'a');
-                        Navigator.of(_keyLoader.currentContext,
-                                rootNavigator: true)
-                            .pop();
-                        Navigator.popUntil(
-                            context, (Route<dynamic> route) => false);
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => HomePage()));
+                        if (_formKey.currentState.validate()) {
+                          _formKey.currentState.save();
 
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    MyDemo(list: passwordList.decodedList)));
+                          Dialogs.showLoadingDialog(context, _keyLoader);
+
+                          EntryList passwordList = new EntryList();
+                          Authenticator _authenticator = new Authenticator();
+
+                          print('email ' + email);
+                          print('key ' + secretKey);
+
+                          await _authenticator.readFile(
+                              secretKey: secretKey, emailIdentifier: email);
+                          if (_authenticator.passwords != null) {
+                            passwordList.listAsJSON = _authenticator.passwords;
+                            passwordList.decodeEntries();
+                          }
+                          print(_authenticator.passwords);
+
+                          await passwordList.addEntry(this.title, this.username,
+                              this.website, this.password, secretKey, email);
+                          print("got here!");
+                          Navigator.of(_keyLoader.currentContext,
+                                  rootNavigator: true)
+                              .pop();
+                          Navigator.popUntil(
+                              context, (Route<dynamic> route) => false);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => HomePage()));
+
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MyDemo(
+                                      secret: secretKey,
+                                      email: email,
+                                      list: passwordList.decodedList)));
+                        }
                       },
                     ),
-                  ]))
+                  ])))
             ],
           ),
         ),

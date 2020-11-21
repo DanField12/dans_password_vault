@@ -38,19 +38,19 @@ class EntryList {
   }
 
   Future<void> addEntry(String title, String username, String websiteURL,
-      String password, String secretKey) async {
+      String password, String secretKey, String email) async {
     decodedList.add(new Entry(
         title: title,
         username: username,
         websiteURL: websiteURL,
         password: password));
-    setEntries(secretKey);
+    setEntries(secretKey, email);
   }
 
-  Future<void> setEntries(String secretKey) async {
+  Future<void> setEntries(String secretKey, String email) async {
     listAsJSON = '{"elements": ${jsonEncode(decodedList)}}';
     print(listAsJSON);
     Authenticator _authenticator = new Authenticator();
-    await _authenticator.write(secretKey, listAsJSON);
+    await _authenticator.write(secretKey, listAsJSON, email);
   }
 }

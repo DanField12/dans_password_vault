@@ -7,37 +7,64 @@ class Authenticator {
   String passwords;
   bool authenticated = false;
 
-  Future<void> write(String secretKey, String text) async {
+  Future<void> initNewUser(String secretKey, String emailIdentifier) async {
+    final Directory directory = await getApplicationDocumentsDirectory();
+    var crypt = AesCrypt(secretKey);
+    print('encrypted');
+
+    crypt.encryptTextToFileSync('Authenticated',
+        directory.path + '/' + emailIdentifier + 'auth.txt.aes',
+        utf16: true);
+  }
+
+  Future<void> write(
+      String secretKey, String text, String emailIdentifier) async {
     final Directory directory = await getApplicationDocumentsDirectory();
     var crypt = AesCrypt(secretKey);
     print('encrypted');
     crypt.setOverwriteMode(AesCryptOwMode.on);
-    crypt.encryptTextToFileSync(text, '${directory.path}/testfile.txt.aes',
+    crypt.encryptTextToFileSync(
+        text, directory.path + '/' + emailIdentifier + '.txt.aes',
         utf16: true);
   }
 
-  Future<void> authenticate(String secretKey) async {
-    // await write('a',
-    //     '{"elements": [{"title": "Google","websiteURL": "google.com", "username": "bob", "password": "mypassword1"},{"title": "Steam" ,"websiteURL": "store.steampowered.com", "username": "bob6969", "password": "mypassword2"},{"title" : "Apple","websiteURL": "apple.com", "username": "david12", "password": "mypassword3"}]}');
-    await Future.delayed(Duration(seconds: 5), () async {
-      passwords = await readFile(secretKey);
-    });
-    authenticated = (passwords != 'Error');
+  Future<void> authenticate({
+    String secretKey,
+    String emailIdentifier,
+  }) async {
+    String text;
+    print('got here');
+    try {
+      var crypt = AesCrypt(secretKey);
+      final Directory directory = await getApplicationDocumentsDirectory();
+
+      text = crypt.decryptTextFromFileSync(
+          directory.path + '/' + emailIdentifier + 'auth.txt.aes',
+          utf16: true);
+      print(text);
+    } catch (e) {
+      print(e);
+    }
+    // return (text == 'authenticated');
+
+    // await Future.delayed(Duration(seconds: 5), () async {
+    //   passwords = await readFile(secretKey);
+    // });
+    authenticated = (text == 'Authenticated');
   }
 
-  Future<String> readFile(String secretKey) async {
+  Future<void> readFile({String secretKey, String emailIdentifier}) async {
     String text;
     try {
       var crypt = AesCrypt(secretKey);
       final Directory directory = await getApplicationDocumentsDirectory();
-      print('${directory.path}/testfile.txt.aes');
-      text = crypt.decryptTextFromFileSync('${directory.path}/testfile.txt.aes',
+      text = crypt.decryptTextFromFileSync(
+          directory.path + '/' + emailIdentifier + '.txt.aes',
           utf16: true);
       print(text);
-      return text;
+      passwords = text;
     } catch (e) {
       print("Couldn't read file");
-      return 'Error';
     }
   }
 }
