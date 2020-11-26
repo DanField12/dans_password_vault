@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import '../authenticate.dart';
 import '../json_parse.dart';
 import '../main.dart';
+import 'home.dart';
 import '../loading.dart';
 import 'register.dart';
 
@@ -57,30 +58,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: Column(children: [
                   TextFormField(
                       decoration: const InputDecoration(
-                        labelText: 'Title',
+                        labelText: 'Email',
                       ),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          setState(() {
-                            failMessage = 'Please enter your Email';
-                          });
-                        }
-                      },
                       onSaved: (val) => setState(() => emailEntry = val)),
                   TextFormField(
                       enableSuggestions: false,
                       autocorrect: false,
                       obscureText: true,
                       decoration: const InputDecoration(
-                        hintText: 'Enter your password',
+                        labelText: 'Password',
                       ),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          setState(() {
-                            failMessage = 'Please enter your password';
-                          });
-                        }
-                      },
                       onSaved: (val) => setState(() => passwordEntry = val)),
                   Text(
                     failMessage,
@@ -88,55 +75,69 @@ class _MyHomePageState extends State<MyHomePage> {
                       color: Colors.red,
                     ),
                   ),
-                  ElevatedButton(
-                      child: Text('Login'),
-                      onPressed: () async {
-                        final form = _formKey.currentState;
-                        if (form.validate()) {
-                          buildList = [];
-                          form.save();
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                          padding: EdgeInsets.all(8),
+                          child: ElevatedButton(
+                              child: Text('Login'),
+                              onPressed: () async {
+                                final form = _formKey.currentState;
+                                if (passwordEntry != null ||
+                                    emailEntry != null) {
+                                  if (form.validate()) {
+                                    buildList = [];
+                                    form.save();
 
-                          Dialogs.showLoadingDialog(context, _keyLoader);
-                          await _authenticator.authenticate(
-                              secretKey: passwordEntry,
-                              emailIdentifier: emailEntry);
-                          await _authenticator.readFile(
-                              secretKey: passwordEntry,
-                              emailIdentifier: emailEntry);
-                          Navigator.of(_keyLoader.currentContext,
-                                  rootNavigator: true)
-                              .pop();
-                          if (_authenticator.authenticated) {
-                            EntryList passwordList = new EntryList();
-                            if (_authenticator.passwords != null) {
-                              passwordList.listAsJSON =
-                                  _authenticator.passwords;
-                              passwordList.decodeEntries();
-                            }
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MyDemo(
-                                          list: passwordList.decodedList,
-                                          email: emailEntry,
-                                          secret: passwordEntry,
-                                        )));
-                            // Navigate to second route when tapped.
-                          } else if (passwordEntry != '') {
-                            setState(() {
-                              failMessage = 'Incorrect password';
-                            });
-                          }
-                        }
-                      }),
-                  ElevatedButton(
-                      child: Text('Register'),
-                      onPressed: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => RegisterPage()));
-                      })
+                                    Dialogs.showLoadingDialog(
+                                        context, _keyLoader);
+                                    await _authenticator.authenticate(
+                                        secretKey: passwordEntry,
+                                        emailIdentifier: emailEntry);
+                                    await _authenticator.readFile(
+                                        secretKey: passwordEntry,
+                                        emailIdentifier: emailEntry);
+                                    Navigator.of(_keyLoader.currentContext,
+                                            rootNavigator: true)
+                                        .pop();
+                                    if (_authenticator.authenticated) {
+                                      EntryList passwordList = new EntryList();
+                                      if (_authenticator.passwords != null) {
+                                        passwordList.listAsJSON =
+                                            _authenticator.passwords;
+                                        passwordList.decodeEntries();
+                                      }
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => MyDemo(
+                                                    list: passwordList
+                                                        .decodedList,
+                                                    email: emailEntry,
+                                                    secret: passwordEntry,
+                                                  )));
+                                      // Navigate to second route when tapped.
+                                    } else if (passwordEntry != '') {
+                                      setState(() {
+                                        failMessage = 'Incorrect password';
+                                      });
+                                    }
+                                  }
+                                }
+                              })),
+                      Padding(
+                          padding: EdgeInsets.all(8),
+                          child: ElevatedButton(
+                              child: Text('Register'),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => RegisterPage()));
+                              }))
+                    ],
+                  )
                 ]))
           ],
         ),

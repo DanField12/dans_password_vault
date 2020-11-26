@@ -32,25 +32,27 @@ class Authenticator {
     String secretKey,
     String emailIdentifier,
   }) async {
-    String text;
-    print('got here');
-    try {
-      var crypt = AesCrypt(secretKey);
-      final Directory directory = await getApplicationDocumentsDirectory();
+    await Future.delayed(Duration(seconds: 5), () async {
+      String text;
+      print('got here');
+      try {
+        var crypt = AesCrypt(secretKey);
+        final Directory directory = await getApplicationDocumentsDirectory();
 
-      text = crypt.decryptTextFromFileSync(
-          directory.path + '/' + emailIdentifier + 'auth.txt.aes',
-          utf16: true);
-      print(text);
-    } catch (e) {
-      print(e);
-    }
-    // return (text == 'authenticated');
+        text = crypt.decryptTextFromFileSync(
+            directory.path + '/' + emailIdentifier + 'auth.txt.aes',
+            utf16: true);
+        print(text);
+      } catch (e) {
+        print(e);
+      }
+      // return (text == 'authenticated');
 
-    // await Future.delayed(Duration(seconds: 5), () async {
-    //   passwords = await readFile(secretKey);
-    // });
-    authenticated = (text == 'Authenticated');
+      // await Future.delayed(Duration(seconds: 5), () async {
+      //   passwords = await readFile(secretKey);
+      // });
+      authenticated = (text == 'Authenticated');
+    });
   }
 
   Future<void> readFile({String secretKey, String emailIdentifier}) async {

@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import '../authenticate.dart';
 import '../json_parse.dart';
 import '../main.dart';
+import 'home.dart';
 import '../loading.dart';
 import 'register.dart';
 
