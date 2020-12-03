@@ -23,83 +23,83 @@ class FirstRoute extends State<MyDemo> {
   final List<Entry> list;
 
   @override
+  Future<void> delete(int id) async {
+    await ExitDialogue.showConfirm(
+        context, 'Are you sure you want to delete this.', () {
+      var myList = new EntryList();
+      setState(() {
+        list.removeAt(id);
+        print('deleted');
+      });
+      myList.decodedList = list;
+      myList.setEntries(secretKey, email);
+    });
+  }
+
+  List<Widget> buildList() {
+    // Map<String, dynamic> row = jsonDecode(list);
+    List<Widget> buildList = [];
+    if (list != null) {
+      for (int i = 0; i < list.length; i++) {
+        buildList.add(InkWell(
+          child: ListTile(
+              leading: Image.network(
+                'https://${list[i].websiteURL}/favicon.ico',
+                height: 32,
+                width: 32,
+              ),
+              title: Text('${list[i].title}'),
+              subtitle: Text('${list[i].websiteURL}'),
+              trailing: PopupMenuButton(
+                itemBuilder: (BuildContext context) {
+                  return [
+                    PopupMenuItem(
+                      child: InkWell(
+                        child: Row(children: [Icon(Icons.edit), Text('Edit')]),
+                      ),
+                    ),
+                    PopupMenuItem(
+                      child: InkWell(
+                        child:
+                            Row(children: [Icon(Icons.delete), Text('Delete')]),
+                        onTap: () {
+                          delete(i);
+                        },
+                      ),
+                    ),
+                  ];
+                },
+                icon: Icon(Icons.more_vert),
+              )),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => DetailsPage(
+                          pageTitle: '${list[i].title}',
+                          content: '${list[i].username}',
+                          password: '${list[i].password}',
+                          url: '${list[i].websiteURL}',
+                        )));
+          },
+          // child: Container(
+          //   height: 50,
+          //   child: Center(child: Text('${row['elements'][i]['websiteURL']}')),
+          // ),
+        ));
+      }
+      return buildList;
+    }
+  }
+
   Widget build(BuildContext context) {
     print('key' + secretKey);
     print(list);
-    Future<void> delete(int id) async {
-      await ExitDialogue.showConfirm(
-          context, 'Are you sure you want to delete this.', () {
-        var myList = new EntryList();
-        setState(() {
-          list.removeAt(id);
-          print('deleted');
-        });
-        myList.decodedList = list;
-        myList.setEntries(secretKey, email);
-      });
-    }
-
-    List<Widget> buildList() {
-      // Map<String, dynamic> row = jsonDecode(list);
-      List<Widget> buildList = [];
-      if (list != null) {
-        for (int i = 0; i < list.length; i++) {
-          buildList.add(InkWell(
-            child: ListTile(
-                leading: Image.network(
-                  'https://${list[i].websiteURL}/favicon.ico',
-                  height: 32,
-                  width: 32,
-                ),
-                title: Text('${list[i].title}'),
-                subtitle: Text('${list[i].websiteURL}'),
-                trailing: PopupMenuButton(
-                  itemBuilder: (BuildContext context) {
-                    return [
-                      PopupMenuItem(
-                        child: InkWell(
-                          child:
-                              Row(children: [Icon(Icons.edit), Text('Edit')]),
-                        ),
-                      ),
-                      PopupMenuItem(
-                        child: InkWell(
-                          child: Row(
-                              children: [Icon(Icons.delete), Text('Delete')]),
-                          onTap: () {
-                            delete(i);
-                          },
-                        ),
-                      ),
-                    ];
-                  },
-                  icon: Icon(Icons.more_vert),
-                )),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => DetailsPage(
-                            pageTitle: '${list[i].title}',
-                            content: '${list[i].username}',
-                            password: '${list[i].password}',
-                            url: '${list[i].websiteURL}',
-                          )));
-            },
-            // child: Container(
-            //   height: 50,
-            //   child: Center(child: Text('${row['elements'][i]['websiteURL']}')),
-            // ),
-          ));
-        }
-        return buildList;
-      }
-    }
 
     return new WillPopScope(
       onWillPop: () async {
-        ExitDialogue.showExitDialog(
-            context, 'Are you sure you want to log out.');
+        ExitDialogue.showConfirm(
+            context, 'Are you sure you want to log out.', () {});
         return false;
       },
       child: Scaffold(

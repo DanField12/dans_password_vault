@@ -58,30 +58,16 @@ class _RegisterPageState extends State<_RegisterPage> {
                 child: Column(children: [
                   TextFormField(
                       decoration: const InputDecoration(
-                        labelText: 'Title',
+                        labelText: 'Email',
                       ),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          setState(() {
-                            failMessage = 'Please enter your Email';
-                          });
-                        }
-                      },
                       onSaved: (val) => setState(() => emailEntry = val)),
                   TextFormField(
                       enableSuggestions: false,
                       autocorrect: false,
                       obscureText: true,
                       decoration: const InputDecoration(
-                        hintText: 'Enter your password',
+                        labelText: 'Password',
                       ),
-                      validator: (value) {
-                        if (value.isEmpty) {
-                          setState(() {
-                            failMessage = 'Please enter your password';
-                          });
-                        }
-                      },
                       onSaved: (val) => setState(() => passwordEntry = val)),
                   Text(
                     failMessage,
@@ -93,32 +79,36 @@ class _RegisterPageState extends State<_RegisterPage> {
                       child: Text('Create'),
                       onPressed: () async {
                         final form = _formKey.currentState;
-                        if (form.validate()) {
-                          buildList = [];
-                          form.save();
+                        if (passwordEntry != null || emailEntry != null) {
+                          if (form.validate()) {
+                            buildList = [];
+                            form.save();
 
-                          Dialogs.showLoadingDialog(context, _keyLoader);
-                          await _authenticator.initNewUser(
-                              passwordEntry, emailEntry);
-                          Navigator.of(_keyLoader.currentContext,
-                                  rootNavigator: true)
-                              .pop();
-                          EntryList passwordList = new EntryList();
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MyDemo(
-                                        list: passwordList.decodedList,
-                                        email: emailEntry,
-                                        secret: passwordEntry,
-                                      )));
-                          // Navigate to second route when tapped.
-                        } else if (passwordEntry != '') {
-                          setState(() {
-                            failMessage = 'Incorrect password';
-                          });
+                            String response = await _authenticator.initNewUser(
+                                passwordEntry, emailEntry);
+                            if (response == 'dirExists') {
+                              setState(() {
+                                failMessage = 'User already exists';
+                              });
+                            } else {
+                              EntryList passwordList = new EntryList();
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MyDemo(
+                                            list: passwordList.decodedList,
+                                            email: emailEntry,
+                                            secret: passwordEntry,
+                                          )));
+                              // Navigate to second route when tapped.
+                            }
+                          } else if (passwordEntry != '') {
+                            setState(() {
+                              failMessage = 'Incorrect password';
+                            });
+                          }
+                          passwordEntry = '';
                         }
-                        passwordEntry = '';
                       }),
                 ]))
           ],

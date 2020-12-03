@@ -46,8 +46,10 @@ class CreateEntry extends State<Create> {
   Widget build(BuildContext context) {
     return new WillPopScope(
       onWillPop: () async {
-        ExitDialogue.showExitDialog(context,
-            'Are you sure you want to go back, your entry will NOT be saved.');
+        ExitDialogue.showConfirm(
+            context,
+            'Are you sure you want to go back, your entry will NOT be saved.',
+            () {});
         return false;
       },
       child: Scaffold(
@@ -88,13 +90,13 @@ class CreateEntry extends State<Create> {
                     ElevatedButton(
                         child: Text('Open route'),
                         onPressed: () async {
-                          if (this.password != null ||
-                              this.username != null ||
-                              this.title != null ||
-                              this.website != null) {
-                            if (_formKey.currentState.validate()) {
-                              _formKey.currentState.save();
-
+                          if (_formKey.currentState.validate()) {
+                            _formKey.currentState.save();
+                            if (this.password != null ||
+                                this.username != null ||
+                                this.title != null ||
+                                this.website != null) {
+                              print('we cool');
                               Dialogs.showLoadingDialog(context, _keyLoader);
 
                               EntryList passwordList = new EntryList();
@@ -121,9 +123,9 @@ class CreateEntry extends State<Create> {
                                   secretKey,
                                   email);
                               print("got here!");
-                              Navigator.of(_keyLoader.currentContext,
-                                      rootNavigator: true)
-                                  .pop();
+                              Navigator.pop(
+                                _keyLoader.currentContext,
+                              );
                               Navigator.popUntil(
                                   context, (Route<dynamic> route) => false);
                               Navigator.push(

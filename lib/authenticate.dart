@@ -7,14 +7,19 @@ class Authenticator {
   String passwords;
   bool authenticated = false;
 
-  Future<void> initNewUser(String secretKey, String emailIdentifier) async {
+  Future<String> initNewUser(String secretKey, String emailIdentifier) async {
     final Directory directory = await getApplicationDocumentsDirectory();
     var crypt = AesCrypt(secretKey);
     print('encrypted');
 
-    crypt.encryptTextToFileSync('Authenticated',
-        directory.path + '/' + emailIdentifier + 'auth.txt.aes',
-        utf16: true);
+    try {
+      crypt.encryptTextToFileSync('Authenticated',
+          directory.path + '/' + emailIdentifier + 'auth.txt.aes',
+          utf16: true);
+    } catch (e) {
+      print("didn't work");
+      return 'dirExists';
+    }
   }
 
   Future<void> write(
