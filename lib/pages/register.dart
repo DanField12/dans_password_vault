@@ -18,7 +18,7 @@ class RegisterPage extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: _RegisterPage(title: 'MyVault Login'),
+      home: _RegisterPage(title: 'Register New User'),
     );
   }
 }
@@ -84,8 +84,12 @@ class _RegisterPageState extends State<_RegisterPage> {
                             buildList = [];
                             form.save();
 
+                            Dialogs.showLoadingDialog(context, _keyLoader);
                             String response = await _authenticator.initNewUser(
                                 passwordEntry, emailEntry);
+                            Navigator.of(_keyLoader.currentContext,
+                                    rootNavigator: true)
+                                .pop();
                             if (response == 'dirExists') {
                               setState(() {
                                 failMessage = 'User already exists';
@@ -107,7 +111,6 @@ class _RegisterPageState extends State<_RegisterPage> {
                               failMessage = 'Incorrect password';
                             });
                           }
-                          passwordEntry = '';
                         }
                       }),
                 ]))

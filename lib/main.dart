@@ -53,8 +53,9 @@ class CreateEntry extends State<Create> {
         return false;
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: AppBar(
-          title: Text('First Route'),
+          title: Text('Add New'),
         ), // This trailing comma makes auto-formatting nicer for build methods.
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -88,7 +89,7 @@ class CreateEntry extends State<Create> {
                         ),
                         onSaved: (val) => setState(() => this.password = val)),
                     ElevatedButton(
-                        child: Text('Open route'),
+                        child: Text('Create'),
                         onPressed: () async {
                           if (_formKey.currentState.validate()) {
                             _formKey.currentState.save();
@@ -97,7 +98,6 @@ class CreateEntry extends State<Create> {
                                 this.title != null ||
                                 this.website != null) {
                               print('we cool');
-                              Dialogs.showLoadingDialog(context, _keyLoader);
 
                               EntryList passwordList = new EntryList();
                               Authenticator _authenticator =
@@ -123,9 +123,7 @@ class CreateEntry extends State<Create> {
                                   secretKey,
                                   email);
                               print("got here!");
-                              Navigator.pop(
-                                _keyLoader.currentContext,
-                              );
+
                               Navigator.popUntil(
                                   context, (Route<dynamic> route) => false);
                               Navigator.push(

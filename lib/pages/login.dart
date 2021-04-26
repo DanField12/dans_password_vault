@@ -120,7 +120,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                       // Navigate to second route when tapped.
                                     } else if (passwordEntry != '') {
                                       setState(() {
-                                        failMessage = 'Incorrect password';
+                                        failMessage =
+                                            'Incorrect username or password';
                                       });
                                     }
                                   }

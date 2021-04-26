@@ -75,7 +75,7 @@ class FirstRoute extends State<MyDemo> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => DetailsPage(
+                    builder: (context) => Details(
                           pageTitle: '${list[i].title}',
                           content: '${list[i].username}',
                           password: '${list[i].password}',
@@ -104,7 +104,7 @@ class FirstRoute extends State<MyDemo> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('First Route'),
+          title: Text('Home'),
         ),
         body: Center(
           child: ListView(
