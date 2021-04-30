@@ -33,6 +33,7 @@ class FirstRoute extends State<MyDemo> {
       });
       myList.decodedList = list;
       myList.setEntries(secretKey, email);
+      buildList();
     });
   }
 
@@ -88,8 +89,19 @@ class FirstRoute extends State<MyDemo> {
           // ),
         ));
       }
-      return buildList;
     }
+    if (buildList.isEmpty) {
+      buildList = [
+        Text(
+          "Press the '+' button to add new entries to your password storage.",
+          style: TextStyle(color: Colors.black),
+          textAlign: TextAlign.center,
+          textScaleFactor: 1.2,
+        )
+      ];
+    }
+    print(buildList);
+    return buildList;
   }
 
   Widget build(BuildContext context) {
@@ -104,8 +116,9 @@ class FirstRoute extends State<MyDemo> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Home'),
-        ),
+            title: Row(children: [
+          Text('Home', textAlign: TextAlign.left),
+        ])),
         body: Center(
           child: ListView(
             shrinkWrap: true,

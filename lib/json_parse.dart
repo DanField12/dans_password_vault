@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:dans_password_vault/authenticate.dart';
+import './authenticate.dart';
 
 class Entry {
   Entry({this.title, this.password, this.username, this.websiteURL});

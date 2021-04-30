@@ -1,5 +1,5 @@
-name: dans_password_vault
-description: A new Flutter project.
+name: MyVault
+description: An app to let you store passwords.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -20,6 +20,17 @@ version: 1.0.0+1
 environment:
   sdk: ">=2.7.0 <3.0.0"
 
+flutter_icons:
+  ios: true
+  android: true
+  image_path_ios: "assets/icon.png"
+  image_path_android: "assets/icon.png"
+  # adaptive_icon_background: "assets/launcher/foreground.png"
+  # adaptive_icon_foreground: "assets/launcher/foreground.png"
+
+flutter_launcher_name:
+  name: "My Vault"
+
 dependencies:
   flutter:
     sdk: flutter
@@ -32,6 +43,8 @@ dependencies:
   cupertino_icons: ^1.0.0
 
 dev_dependencies:
+  flutter_launcher_icons: "^0.7.0"
+  flutter_launcher_name: "^0.0.1"
   flutter_test:
     sdk: flutter
 
