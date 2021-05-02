@@ -36,7 +36,7 @@ class DetailsPage extends State<Details> {
       setState(() {
         usernameShown = false;
         usernameMessage = "Show";
-        usernameColour = Color.fromARGB(255, 20, 20, 20);
+        usernameColour = Colors.grey[900];
       });
     } else {
       setState(() {
@@ -52,7 +52,7 @@ class DetailsPage extends State<Details> {
       setState(() {
         passwordShown = false;
         passwordMessage = "Show";
-        passwordColour = Color.fromARGB(255, 20, 20, 20);
+        passwordColour = Colors.grey[900];
       });
     } else {
       setState(() {
@@ -110,6 +110,7 @@ class DetailsPage extends State<Details> {
                   child: Text(
                     content,
                     textScaleFactor: 1,
+                    style: TextStyle(color: usernameColour),
                   ),
                 ),
                 TextButton(
@@ -136,6 +137,7 @@ class DetailsPage extends State<Details> {
                   child: Text(
                     password,
                     textScaleFactor: 1,
+                    style: TextStyle(color: passwordColour),
                   ),
                 ),
                 TextButton(

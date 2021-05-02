@@ -1,9 +1,15 @@
+// import 'dart:html';
+
+import 'package:MyVault/pages/online_help.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:io';
 
 import '../exit_alert.dart';
 import '../json_parse.dart';
 import 'details.dart';
 import '../main.dart';
+import './online_help.dart';
 
 class MyDemo extends StatefulWidget {
   MyDemo({this.list, this.email, this.secret});
@@ -37,6 +43,16 @@ class FirstRoute extends State<MyDemo> {
     });
   }
 
+  // Future<Widget> getImage(url) async {
+  //   try {
+  //     await rootBundle.load('assets/icons/' + url + '.ico');
+  //   } on Exception {
+  //     //   catch (e) {
+
+  //   }
+  // }
+  // getImage(list[i].websiteURL),
+
   List<Widget> buildList() {
     // Map<String, dynamic> row = jsonDecode(list);
     List<Widget> buildList = [];
@@ -44,25 +60,43 @@ class FirstRoute extends State<MyDemo> {
       for (int i = 0; i < list.length; i++) {
         buildList.add(InkWell(
           child: ListTile(
-              leading: Image.network(
-                'https://${list[i].websiteURL}/favicon.ico',
-                height: 32,
-                width: 32,
+              leading: FutureBuilder(
+                future: rootBundle
+                    .load('assets/icons/' + list[i].websiteURL + '.ico'),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Image(
+                      image: AssetImage(
+                        'assets/icons/' + list[i].websiteURL + '.ico',
+                      ),
+                      height: 40,
+                      width: 40,
+                    );
+                  } else {
+                    return Image(
+                      image: AssetImage(
+                        'assets/icons/default.png',
+                      ),
+                      height: 40,
+                      width: 40,
+                    );
+                  }
+                },
               ),
-              title: Text('${list[i].title}'),
-              subtitle: Text('${list[i].websiteURL}'),
+              title: Text(list[i].title),
+              subtitle: Text(list[i].websiteURL),
               trailing: PopupMenuButton(
                 itemBuilder: (BuildContext context) {
                   return [
                     PopupMenuItem(
                       child: InkWell(
-                        child: Row(children: [Icon(Icons.edit), Text('Edit')]),
+                        child: Row(children: [Icon(Icons.edit), Text(' Edit')]),
                       ),
                     ),
                     PopupMenuItem(
                       child: InkWell(
-                        child:
-                            Row(children: [Icon(Icons.delete), Text('Delete')]),
+                        child: Row(
+                            children: [Icon(Icons.delete), Text(' Delete')]),
                         onTap: () {
                           delete(i);
                         },
@@ -116,9 +150,60 @@ class FirstRoute extends State<MyDemo> {
       },
       child: Scaffold(
         appBar: AppBar(
-            title: Row(children: [
-          Text('Home', textAlign: TextAlign.left),
-        ])),
+          title: Text('Home'),
+          actions: <Widget>[
+            PopupMenuButton(
+              itemBuilder: (BuildContext context) {
+                return [
+                  PopupMenuItem(
+                    child: InkWell(
+                      child: Row(children: [
+                        Icon(
+                          Icons.help,
+                          color: Colors.grey[600],
+                        ),
+                        Text(' Help')
+                      ]),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Help(
+                                    s: "Welcome to MyVault. Feel free to start adding new passwords to your storage by pressing the '+' button in the bottom right. You will be redirected to a new page where you can enter the url, the website name (which is just what you want it to be shown as) and your username and password for it.")));
+                      },
+                    ),
+                  ),
+                  PopupMenuItem(
+                    child: InkWell(
+                      child: Row(children: [
+                        Icon(Icons.add_to_drive, color: Colors.grey[600]),
+                        Text(' Export to Drive')
+                      ]),
+                      onTap: () {
+                        // delete(i);
+                      },
+                    ),
+                  ),
+                  PopupMenuItem(
+                    child: InkWell(
+                      child: Row(children: [
+                        Icon(Icons.info, color: Colors.grey[600]),
+                        Text(' Info for Nerds')
+                      ]),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Help(
+                                    s: "My Vault is encrypted using the AES (Advanced Encryption Standard) encryption standard. AES was made by Vincent Rijmen and Joan Daemen. AES uses a 128-bit cipher key. There are 14 rounds and different operations that it does to encrypt your data and keep it safe.")));
+                      },
+                    ),
+                  ),
+                ];
+              },
+            )
+          ],
+        ),
         body: Center(
           child: ListView(
             shrinkWrap: true,

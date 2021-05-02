@@ -13,7 +13,8 @@ import 'pages/home.dart';
 
 void main() {
   runApp(MaterialApp(
-    title: '',
+    title: 'MyVault',
+    debugShowCheckedModeBanner: false,
     home: HomePage(),
   ));
   // MyApp());
